@@ -11,8 +11,8 @@ st.title("Insurance Claim Predictor")
 
 @st.cache_resource
 def get_model():
-    model_path = 'models/claim_predictor.pkl'
-    scaler_path = 'models/scaler.pkl'
+    model_path = '../models/claim_predictor.pkl'
+    scaler_path = '../models/scaler.pkl'
 
     if os.path.exists(model_path) and os.path.exists(scaler_path):
         model = joblib.load(model_path)
@@ -20,9 +20,9 @@ def get_model():
         return model, scaler
     else:
         try:
-            df = pd.read_csv('data/Train_data.csv')
+            df = pd.read_csv('../data/Train_data.csv')
         except FileNotFoundError:
-            st.error("Critical Error: data/Train_data.csv not found.")
+            st.error("Critical Error: ../data/Train_data.csv not found.")
             st.stop()
 
         df['NumberOfWindows'] = df['NumberOfWindows'].astype(str).str.strip().replace('.', np.nan)
