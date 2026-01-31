@@ -1,8 +1,21 @@
-{
+import json
+import os
+
+# --- 1. CONFIGURATION ---
+# The folder and filename for your notebook
+folder = "notebooks"
+filename = "insurance_claim_analysis.ipynb"
+filepath = os.path.join(folder, filename)
+
+# Create the folder if it doesn't exist
+os.makedirs(folder, exist_ok=True)
+
+# --- 2. NOTEBOOK CONTENT ---
+# This dictionary represents the standard structure of a Jupyter Notebook
+notebook_content = {
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "622d0f79",
    "metadata": {},
    "source": [
     "# Insurance Claim Prediction\n",
@@ -19,8 +32,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "a7090afd",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -43,32 +55,28 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "afd054eb",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
     "df = pd.read_csv('../data/Train_data.csv')\n",
     "desc = pd.read_csv('../data/Variable Description.csv')\n",
-    "df.head()\n"
+    "df.head()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "1e703cd1",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
     "with pd.option_context('display.max_colwidth', None):\n",
-    "  print(desc.head())\n",
-    "\n"
+    "  print(desc.head())"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "a648100b",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -77,7 +85,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "6f88f326",
    "metadata": {},
    "source": [
     "## Data Cleaning\n",
@@ -88,24 +95,21 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "669c5b8e",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
     "# Changed all . in NumberOfWindows column to NaN and converted to numeric\n",
     "df['NumberOfWindows'] = df['NumberOfWindows'].astype(str).str.strip().replace('.', np.nan)\n",
-    "df['NumberOfWindows'] = pd.to_numeric(df['NumberOfWindows'], errors='coerce')\n"
+    "df['NumberOfWindows'] = pd.to_numeric(df['NumberOfWindows'], errors='coerce')"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "e9d786f2",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
-    "\n",
     "# Checked for missing values\n",
     "missing = df.isnull()\n",
     "print(\"Missing Values Before Cleaning:\\n\", missing.sum()[missing.sum() > 0])"
@@ -113,19 +117,17 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "7b2f8dd0",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
     "for col in ['Building Dimension','Date_of_Occupancy','NumberOfWindows']:\n",
-    "    df[col] = df[col].fillna(df[col].median())\n"
+    "    df[col] = df[col].fillna(df[col].median())"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "0ef4f031",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -135,8 +137,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "d884759f",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -145,7 +146,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "98b0186b",
    "metadata": {},
    "source": [
     "## Exploratory Data Analysis (EDA)"
@@ -153,8 +153,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "02d55aa6",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -167,8 +166,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "10b77d58",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -180,8 +178,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "4826f4ae",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -193,7 +190,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "46d4ceac",
    "metadata": {},
    "source": [
     "## Preprocessing for Modeling\n",
@@ -204,8 +200,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "16e4ffb8",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -217,26 +212,21 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "12771206",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
-    "\n",
-    "\n",
     "#  Encoding categorical variables\n",
     "cat_cols = ['Garden', 'Building_Fenced', 'Building_Painted','Geo_Code','Settlement','Building_Type']\n",
     "\n",
     "for col in cat_cols:\n",
     "    le = LabelEncoder()\n",
-    "    df_model[col] = le.fit_transform(df_model[col])\n",
-    "\n"
+    "    df_model[col] = le.fit_transform(df_model[col])"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "df8b1d13",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -250,8 +240,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "fc7fd752",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -263,8 +252,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "a0aa8258",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -273,7 +261,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "ec3b55ca",
    "metadata": {},
    "source": [
     "## Model Implementation\n",
@@ -285,8 +272,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "ddc4d8f3",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -298,8 +284,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "24a265fb",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -311,12 +296,10 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "90dc7f20",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
-    "\n",
     "# XGBoost\n",
     "# scale_pos_weight accounts for class imbalance (approx ratio of 0s to 1s)\n",
     "ratio = float(np.sum(y_train == 0)) / np.sum(y_train == 1)\n",
@@ -327,7 +310,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "0df96f01",
    "metadata": {},
    "source": [
     "## Model Evaluation\n",
@@ -336,8 +318,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "196b15e1",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -357,19 +338,16 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "276c0af4",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
-    "\n",
     "evaluate_model(\"Logistic Regression\", y_test, lr_pred)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "932ed2a7",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -378,8 +356,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "id": "b2550b9e",
+   "execution_count": None,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -388,7 +365,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "715ad370",
    "metadata": {},
    "source": [
     "# Project Summary and Insights\n",
@@ -399,7 +375,23 @@
     "\n",
     "* Bias Mitigation: The initial data showed a heavy imbalance (fewer claims than non claims). By implementing class weighting in our models, we successfully forced the algorithm to pay attention to the minority class, ensuring we don't miss potential high risk policies.\n",
     "\n",
-    "* Recommendation: We recommend deploying the Logistic Regression model as a Pre Screening Tool for underwriters. This allows for automated risk scoring, enabling human experts to focus only on high probability cases.\n"
+    "* Recommendation: We recommend deploying the Logistic Regression model as a Pre Screening Tool for underwriters. This allows for automated risk scoring, enabling human experts to focus only on high probability cases."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Save the final model for the App\n",
+    "import os\n",
+    "import joblib\n",
+    "\n",
+    "os.makedirs('../models', exist_ok=True)\n",
+    "joblib.dump(lr, '../models/claim_predictor.pkl')\n",
+    "joblib.dump(scaler, '../models/scaler.pkl')\n",
+    "print(\"✅ Model saved successfully!\")"
    ]
   }
  ],
@@ -419,9 +411,16 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.12.1"
+   "version": "3.8.5"
   }
  },
  "nbformat": 4,
- "nbformat_minor": 5
+ "nbformat_minor": 4
 }
+
+# --- 3. WRITE THE FILE ---
+with open(filepath, 'w', encoding='utf-8') as f:
+    json.dump(notebook_content, f, indent=1)
+
+print(f"✅ Successfully rebuilt notebook at: {filepath}")
+print("👉 You can now open this file in VS Code and it will work perfectly.")
