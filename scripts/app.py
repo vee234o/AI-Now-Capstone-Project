@@ -3,101 +3,82 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.linear_model import LogisticRegression
+
+st.set_page_config(page_title="Insurance Claim Predictor", layout="centered")
 
 st.title("Insurance Claim Predictor")
+st.write("This app uses the pre-trained Logistic Regression model to assess building risk.")
 
+# Function to load the already saved models
 @st.cache_resource
-def get_model():
-    model_path = '../models/claim_predictor.pkl'
-    scaler_path = '../models/scaler.pkl'
+def load_saved_assets():
+    # Using the exact file paths from your repository
+    model_path = 'models/claim_predictor.pkl'
+    scaler_path = 'models/scaler.pkl'
 
     if os.path.exists(model_path) and os.path.exists(scaler_path):
         model = joblib.load(model_path)
         scaler = joblib.load(scaler_path)
         return model, scaler
     else:
-        try:
-            df = pd.read_csv('../data/Train_data.csv')
-        except FileNotFoundError:
-            st.error("Critical Error: ../data/Train_data.csv not found.")
-            st.stop()
+        st.error(f"Error: Saved models not found at {model_path} or {scaler_path}. Please ensure the models folder is in the correct directory.")
+        st.stop()
 
-        df['NumberOfWindows'] = df['NumberOfWindows'].astype(str).str.strip().replace('.', np.nan)
-        df['NumberOfWindows'] = pd.to_numeric(df['NumberOfWindows'], errors='coerce')
+# Load the existing models
+model, scaler = load_saved_assets()
 
-        for col in ['Building Dimension', 'Date_of_Occupancy', 'NumberOfWindows']:
-            df[col] = df[col].fillna(df[col].median())
+# User Interface for Inputs
+col1, col2 = st.columns(2)
 
-        for col in ['Garden', 'Geo_Code', 'Building_Fenced', 'Building_Painted']:
-            df[col] = df[col].fillna(df[col].mode()[0])
+with col1:
+    year_obs = st.number_input("Year of Observation", 2010, 2025, 2014)
+    insured_period = st.slider("Insured Period (0.0 to 1.0)", 0.0, 1.0, 1.0)
+    residential = st.selectbox("Is the building residential?", [0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
+    building_dim = st.number_input("Building Dimension (m2)", 0.0, 30000.0, 500.0)
+    date_occupancy = st.number_input("Year of First Occupancy", 1800, 2024, 1960)
 
-        df = df.drop('Customer Id', axis=1)
+with col2:
+    painted = st.selectbox("Building Painted", ["N", "V"], help="N: Painted, V: Not Painted")
+    fenced = st.selectbox("Building Fenced", ["N", "V"], help="N: Fenced, V: Not Fenced")
+    garden = st.selectbox("Garden Status", ["O", "V"], help="V: Has Garden, O: No Garden")
+    settlement = st.selectbox("Settlement Area", ["R", "U"], help="R: Rural, U: Urban")
+    building_type = st.selectbox("Building Type", [1, 2, 3, 4])
+    num_windows = st.number_input("Number of Windows", 0, 50, 3)
+    geo_code = st.number_input("Geographical Code", 0, 99999, 1053)
 
-        le = LabelEncoder()
-        cols = ['Garden', 'Building_Fenced', 'Building_Painted', 'Settlement', 'Geo_Code', 'Building_Type']
-        for col in cols:
-            df[col] = le.fit_transform(df[col])
+# Mapping textual categories to numeric values used during model training
+# Based on LabelEncoder standards used in your analysis: N=0, V=1 | O=0, V=1 | R=0, U=1
+mapping = {"N": 0, "V": 1, "O": 0, "R": 0, "U": 1}
 
-        X = df.drop('Claim', axis=1)
-        y = df['Claim']
-
-        X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-        scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train)
-
-        model = LogisticRegression(class_weight='balanced', random_state=42)
-        model.fit(X_train_scaled, y_train)
-
-        os.makedirs('models', exist_ok=True)
-        joblib.dump(model, model_path)
-        joblib.dump(scaler, scaler_path)
-        
-        return model, scaler
-
-model, scaler = get_model()
-
-year_obs = st.number_input("Year of Observation", 2010, 2030, 2014)
-insured_period = st.number_input("Insured Period", 0.0, 1.0, 1.0)
-residential = st.selectbox("Residential", [0, 1])
-painted = st.selectbox("Building Painted", ["N", "V"])
-fenced = st.selectbox("Building Fenced", ["N", "V"])
-garden = st.selectbox("Garden", ["O", "V"])
-settlement = st.selectbox("Settlement", ["R", "U"])
-building_dim = st.number_input("Building Dimension", 0.0, 20000.0, 500.0)
-building_type = st.selectbox("Building Type", [1, 2, 3, 4])
-date_occupancy = st.number_input("Date of Occupancy", 1800, 2030, 1960)
-num_windows = st.number_input("Number of Windows", 0, 100, 3)
-geo_code = st.number_input("Geo Code", 0, 100000, 1000)
-
-painted_val = 0 if painted == "N" else 1
-fenced_val = 0 if fenced == "N" else 1
-garden_val = 0 if garden == "O" else 1
-settlement_val = 0 if settlement == "R" else 1
-
-input_data = pd.DataFrame([{
+# Prepare input data in the exact order the model expects
+input_df = pd.DataFrame([{
     'YearOfObservation': year_obs,
     'Insured_Period': insured_period,
     'Residential': residential,
-    'Building_Painted': painted_val,
-    'Building_Fenced': fenced_val,
-    'Garden': garden_val,
-    'Settlement': settlement_val,
+    'Building_Painted': mapping[painted],
+    'Building_Fenced': mapping[fenced],
+    'Garden': mapping[garden],
+    'Settlement': mapping[settlement],
     'Building Dimension': building_dim,
     'Building_Type': building_type,
-    'Date_of_Occupancy': date_occupancy,
-    'NumberOfWindows': num_windows,
+    'Date_of_Occupancy': float(date_occupancy),
+    'NumberOfWindows': float(num_windows),
     'Geo_Code': geo_code
 }])
 
-if st.button("Predict"):
-    scaled_data = scaler.transform(input_data)
-    prediction = model.predict(scaled_data)[0]
-    probability = model.predict_proba(scaled_data)[0][1]
+st.divider()
+
+if st.button("Predict Risk"):
+    # Apply the saved scaler to the input data
+    scaled_input = scaler.transform(input_df)
+    
+    # Generate prediction and probability using the loaded model
+    prediction = model.predict(scaled_input)[0]
+    probability = model.predict_proba(scaled_input)[0][1]
 
     if prediction == 1:
-        st.write(f"High Risk. Probability: {probability:.2%}")
+        st.error(f"Result: High Risk Policy")
+        st.write(f"The model estimates a **{probability:.2%}** probability of a claim.")
     else:
-        st.write(f"Low Risk. Probability: {probability:.2%}")
+        st.success(f"Result: Low Risk Policy")
+        st.write(f"The model estimates a **{probability:.2%}** probability of a claim.")
