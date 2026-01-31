@@ -391,7 +391,7 @@ notebook_content = {
     "os.makedirs('../models', exist_ok=True)\n",
     "joblib.dump(lr, '../models/claim_predictor.pkl')\n",
     "joblib.dump(scaler, '../models/scaler.pkl')\n",
-    "print(\"✅ Model saved successfully!\")"
+    "print(\"Model saved successfully!\")"
    ]
   }
  ],
@@ -422,5 +422,5 @@ notebook_content = {
 with open(filepath, 'w', encoding='utf-8') as f:
     json.dump(notebook_content, f, indent=1)
 
-print(f"✅ Successfully rebuilt notebook at: {filepath}")
-print("👉 You can now open this file in VS Code and it will work perfectly.")
+print(f"Successfully rebuilt notebook at: {filepath}")
+print("You can now open this file in VS Code and it will work perfectly.")
